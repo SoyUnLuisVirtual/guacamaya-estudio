@@ -1,0 +1,45 @@
+<!-- Script de contador conectado a Netlify Functions y Netlify Blobs -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const contadorNav = document.getElementById("contador-descargas-nav");
+            const contadorFooter = document.getElementById("contador-descargas-footer");
+            
+            const botonesDescarga = [
+                document.getElementById("btn-descargar-nav"),
+                document.getElementById("btn-descargar-hero"),
+                document.getElementById("btn-descargar-footer")
+            ];
+
+            // 1. Obtener el valor actual del contador al cargar la página
+            fetch("/.netlify/functions/download-counter")
+                .then(res => res.json())
+                .then(data => {
+                    if(contadorNav) contadorNav.textContent = data.total;
+                    if(contadorFooter) contadorFooter.textContent = data.total;
+                })
+                .catch(err => {
+                    console.error("Error al obtener el contador:", err);
+                    if(contadorNav) contadorNav.textContent = "---";
+                    if(contadorFooter) contadorFooter.textContent = "---";
+                });
+
+            // 2. Incrementar el contador al hacer clic en los botones de descarga
+            botonesDescarga.forEach(btn => {
+                if (btn) {
+                    btn.addEventListener("click", () => {
+                        fetch("/.netlify/functions/download-counter", {
+                            method: "POST"
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if(contadorNav) contadorNav.textContent = data.total;
+                            if(contadorFooter) contadorFooter.textContent = data.total;
+                        })
+                        .catch(err => {
+                            console.error("Error al registrar la descarga:", err);
+                        });
+                    });
+                }
+            });
+        });
+    </script>
