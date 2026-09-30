@@ -243,56 +243,65 @@
     </footer>
 
     <!-- Script de contador optimizado para Netlify Functions -->
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const contadorNav = document.getElementById("contador-descargas-nav");
-            const contadorFooter = document.getElementById("contador-descargas-footer");
-            
-            const botonesDescarga = [
-                document.getElementById("btn-descargar-nav"),
-                document.getElementById("btn-descargar-hero"),
-                document.getElementById("btn-descargar-footer")
-            ];
+   <!-- Script de contador optimizado para asegurar el registro de la descarga -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const contadorNav = document.getElementById("contador-descargas-nav");
+        const contadorFooter = document.getElementById("contador-descargas-footer");
+        
+        const botonesDescarga = [
+            document.getElementById("btn-descargar-nav"),
+            document.getElementById("btn-descargar-hero"),
+            document.getElementById("btn-descargar-footer")
+        ];
 
-            // Valor por defecto inmediato para evitar bloqueos
-            if(contadorNav) contadorNav.textContent = "0";
-            if(contadorFooter) contadorFooter.textContent = "0";
+        // Valor por defecto inmediato
+        if(contadorNav) contadorNav.textContent = "0";
+        if(contadorFooter) contadorFooter.textContent = "0";
 
-            // 1. Obtener el valor real del contador en segundo plano
-            fetch("/.netlify/functions/download-counter")
-                .then(res => res.json())
-                .then(data => {
-                    if(data && typeof data.total !== 'undefined') {
-                        if(contadorNav) contadorNav.textContent = data.total;
-                        if(contadorFooter) contadorFooter.textContent = data.total;
-                    }
-                })
-                .catch(err => {
-                    console.error("Error al obtener el contador:", err);
-                });
-
-            // 2. Incrementar el contador al hacer clic en los botones de descarga
-            botonesDescarga.forEach(btn => {
-                if (btn) {
-                    btn.addEventListener("click", () => {
-                        fetch("/.netlify/functions/download-counter", {
-                            method: "POST"
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if(data && typeof data.total !== 'undefined') {
-                                if(contadorNav) contadorNav.textContent = data.total;
-                                if(contadorFooter) contadorFooter.textContent = data.total;
-                            }
-                        })
-                        .catch(err => {
-                            console.error("Error al registrar la descarga:", err);
-                        });
-                    });
+        // 1. Obtener el valor real del contador al cargar
+        fetch("/.netlify/functions/download-counter")
+            .then(res => res.json())
+            .then(data => {
+                if(data && typeof data.total !== 'undefined') {
+                    if(contadorNav) contadorNav.textContent = data.total;
+                    if(contadorFooter) contadorFooter.textContent = data.total;
                 }
+            })
+            .catch(err => {
+                console.error("Error al obtener el contador:", err);
             });
+
+        // 2. Interceptar el clic para registrar la descarga en Netlify Blobs antes de navegar
+        botonesDescarga.forEach(btn => {
+            if (btn) {
+                btn.addEventListener("click", (e) => {
+                    e.preventDefault(); // Evita que abra el enlace inmediatamente
+                    const urlDestino = btn.href;
+
+                    // Registramos el incremento en la nube (POST)
+                    fetch("/.netlify/functions/download-counter", {
+                        method: "POST"
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data && typeof data.total !== 'undefined') {
+                            if(contadorNav) contadorNav.textContent = data.total;
+                            if(contadorFooter) contadorFooter.textContent = data.total;
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error al registrar la descarga:", err);
+                    })
+                    .finally(() => {
+                        // Una vez enviado el registro, procedemos a abrir la descarga del APK
+                        window.location.href = urlDestino;
+                    });
+                });
+            }
         });
-    </script>
+    });
+</script>
 
 </body>
 </html>
