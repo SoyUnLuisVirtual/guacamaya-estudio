@@ -1,0 +1,8 @@
+{
+  "name": "guacamaya-estudio",
+  "version": "1.0.0",
+  "description": "Landing page y contador para Guacamaya Estudio",
+  "dependencies": {
+    "@netlify/blobs": "^7.0.0"
+  }
+}
