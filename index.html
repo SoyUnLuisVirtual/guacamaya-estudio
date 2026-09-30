@@ -15,12 +15,13 @@
 <body class="bg-slate-950 text-slate-100 antialiased selection:bg-blue-500 selection:text-white overflow-x-hidden">
 
     <header class="fixed top-0 left-0 right-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center shadow-lg shadow-blue-500/30 text-white font-bold text-xl flex-shrink-0">
+        <!-- Espaciado y padding ajustados para mejor responsividad en móviles -->
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center shadow-lg shadow-blue-500/30 text-white font-bold text-lg sm:text-xl flex-shrink-0">
                     🦜
                 </div>
-                <span class="text-base sm:text-xl font-bold tracking-tight text-white whitespace-nowrap">Guacamaya <span class="text-blue-400">Estudio</span></span>
+                <span class="text-sm sm:text-xl font-bold tracking-tight text-white truncate">Guacamaya <span class="text-blue-400">Estudio</span></span>
             </div>
             <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-300">
                 <a href="#features" class="hover:text-blue-400 transition-colors">Características</a>
@@ -28,11 +29,11 @@
                 <a href="#pomodoro" class="hover:text-blue-400 transition-colors">Pomodoro & Castor</a>
                 <a href="#download" class="hover:text-blue-400 transition-colors">Descarga</a>
             </nav>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 <span class="text-xs text-slate-400 hidden sm:inline">Descargas: <strong id="contador-descargas-nav" class="text-blue-400">0</strong></span>
-                <a id="btn-descargar-nav" href="https://github.com/SoyUnLuisVirtual/guacamaya-estudio/releases/download/v1/Guacamaya_Estudio.apk" download class="bg-blue-600 hover:bg-blue-500 text-white px-4 sm:px-5 py-2.5 rounded-xl font-medium text-xs sm:text-sm transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2 whitespace-nowrap">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    Descargar APK
+                <a id="btn-descargar-nav" href="https://github.com/SoyUnLuisVirtual/guacamaya-estudio/releases/download/v1/Guacamaya_Estudio.apk" download class="bg-blue-600 hover:bg-blue-500 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm transition-all shadow-lg shadow-blue-600/25 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>Descargar APK</span>
                 </a>
             </div>
         </div>
@@ -221,7 +222,7 @@
                     Descargar APK Oficial (v1.2.0)
                 </a>
             </div>
-            <p class="text-xs text-slate-500">Peso del archivo: ~38 MB • Descargas Totales: <strong id="contador-descargas-footer" class="text-blue-400">...</strong></p>
+            <p class="text-xs text-slate-500">Peso del archivo: ~38 MB • Descargas Totales: <strong id="contador-descargas-footer" class="text-blue-400">0</strong></p>
         </div>
     </section>
 
@@ -241,7 +242,7 @@
         </div>
     </footer>
 
-    <!-- Script de contador conectado a Netlify Functions y Netlify Blobs -->
+    <!-- Script de contador optimizado para Netlify Functions -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const contadorNav = document.getElementById("contador-descargas-nav");
@@ -253,17 +254,21 @@
                 document.getElementById("btn-descargar-footer")
             ];
 
-            // 1. Obtener el valor actual del contador al cargar la página
+            // Valor por defecto inmediato para evitar bloqueos
+            if(contadorNav) contadorNav.textContent = "0";
+            if(contadorFooter) contadorFooter.textContent = "0";
+
+            // 1. Obtener el valor real del contador en segundo plano
             fetch("/.netlify/functions/download-counter")
                 .then(res => res.json())
                 .then(data => {
-                    if(contadorNav) contadorNav.textContent = data.total;
-                    if(contadorFooter) contadorFooter.textContent = data.total;
+                    if(data && typeof data.total !== 'undefined') {
+                        if(contadorNav) contadorNav.textContent = data.total;
+                        if(contadorFooter) contadorFooter.textContent = data.total;
+                    }
                 })
                 .catch(err => {
                     console.error("Error al obtener el contador:", err);
-                    if(contadorNav) contadorNav.textContent = "---";
-                    if(contadorFooter) contadorFooter.textContent = "---";
                 });
 
             // 2. Incrementar el contador al hacer clic en los botones de descarga
@@ -275,8 +280,10 @@
                         })
                         .then(res => res.json())
                         .then(data => {
-                            if(contadorNav) contadorNav.textContent = data.total;
-                            if(contadorFooter) contadorFooter.textContent = data.total;
+                            if(data && typeof data.total !== 'undefined') {
+                                if(contadorNav) contadorNav.textContent = data.total;
+                                if(contadorFooter) contadorFooter.textContent = data.total;
+                            }
                         })
                         .catch(err => {
                             console.error("Error al registrar la descarga:", err);
